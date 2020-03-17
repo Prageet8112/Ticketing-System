@@ -38,7 +38,7 @@ exports.tickets_get_all_closed_tickets = (req,res,next) =>{
     });
 }
 
-exports.tickets_get_ticket_detail = (req,res,next) => {
+exports.tickets_get_ticket_details = (req,res,next) => {
     const id = req.params.ticketId;
     Ticket.findById(id)
     .exec()
@@ -50,7 +50,7 @@ exports.tickets_get_ticket_detail = (req,res,next) => {
         }
         res.status(200).json({
             name : result.name,
-            age  : resule.age,
+            age  : result.age,
             currentStatus : result.currentStatus,
             _id : id
         })
@@ -144,6 +144,7 @@ exports.tickets_open_all_tickets_of_bus= (req,res,next) => {
         return Ticket.deleteMany({busNumber:regNumber});
     })
     .then(result => {
+        console.log("in sec hen" + result);
         res.status(200).json({
             message : 'All Tickets are Open for BUS : ' + regNumber
         });
@@ -206,13 +207,11 @@ exports.tickets_update_status_of_ticket=(req,res,next) =>{
                 message : 'Invalid Bus Number or Seat Number'
             })
         }
-        return Ticket.updateOne({busNumber:busNumber , seatNumber :seatNumber}
-            ,{currentStatus:req.body.currentStatus}).exec();
+        return Ticket.findOneAndRemove({busNumber:busNumber , seatNumber :seatNumber}).exec();
     })
     .then(result =>{
         res.status(200).json({
-            message : "Ticket Updated Successfully"
-            //put get api
+            message : "Ticket Removed Successfully" ,
         })
     })
     .catch( err =>{ 

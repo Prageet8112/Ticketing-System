@@ -1,4 +1,5 @@
 const Bus = require('../models/bus');
+const Ticket = require('../models/ticket');
 const mongoose = require('mongoose');
 
 exports.buses_get_all = (req,res,next) => {
@@ -89,19 +90,28 @@ exports.buses_add_new_bus = (req,res,next) => {
 }
 
 exports.buses_delete_bus = (req,res,next) => {
-    const BusId = req.params.registrationNumber;
-    Bus.remove({registrationNumber:BusId})
+    const busId = req.params.registrationNumber;
+
+    Bus.findOneAndRemove({registrationNumber:busId})
     .exec()
+    .then(result =>{
+        if(result){
+            console.log("In Delte many");
+            return Ticket.deleteMany({busNumber:busId}).exec();
+        }
+        return res.status(404).json({
+                error:"BUS NOT FOUND"
+            })
+    })
     .then(result =>{
         res.status(200).json({
             message : "Bus Removed Successfully"
-        })
+        });
     })
     .catch(err =>{
         console.log(err);
         res.status(200).json({
-            error:err,
-            message : 'Invalid API'
+            error: err
         })
     });
 }

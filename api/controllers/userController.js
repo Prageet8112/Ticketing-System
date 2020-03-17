@@ -9,7 +9,7 @@ exports.users_user_signup = (req,res,next) => {
     .exec()
     .then(user => {
         if(user.length >=1 ){
-            return  res.status(409).json({
+            return  res.status(500).json({
                 message:"Mail Exists"
             })
         }
@@ -100,7 +100,7 @@ exports.users_delete_user = (req,res,next) => {
     
     console.log(req.params.userId);
 
-    User.remove({ _id : req.params.userId })
+    User.remove({ email : req.params.email })
     .exec()
     .then(result => {
         res.status(200).json({
