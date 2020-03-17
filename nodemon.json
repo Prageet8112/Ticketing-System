@@ -1,0 +1,6 @@
+{
+    "env" : {
+        "MONGO_ATLAS_PW" : "ticket-app",
+        "JWT_KEY" : "somehashedkey"
+    }
+}
