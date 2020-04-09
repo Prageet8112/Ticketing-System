@@ -5,7 +5,7 @@ const ticketSchema = mongoose.Schema({
     seatNumber : {type:Number , required:true},
     busNumber : {type : String , required:true , ref:'Bus'},
     name : {type:String , required:true},
-    age : {type:String , required:true} ,
+    age : {type:Number , required:true} ,
     currentStatus : String
 });
 

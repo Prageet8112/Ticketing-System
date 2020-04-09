@@ -4,9 +4,13 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const ticketRoutes = require('./api/routes/tickets');
+
 const busesRoutes = require('./api/routes/buses');
+const busesAdminRoutes = require('./api/routes/buses-admin');
+const ticketRoutes = require('./api/routes/tickets');
+const ticketsAdminRoutes = require('./api/routes/tickets-admin');
 const usersRoutes = require('./api/routes/users');
+
 
 mongoose.connect('mongodb+srv://ticket-app:' + process.env.MONGO_ATLAS_PW + 
 '@ticket-app-mbgne.mongodb.net/test?retryWrites=true&w=majority',
@@ -33,7 +37,9 @@ app.use((res,req,next) => {
 
 app.use('/users',usersRoutes);
 app.use('/buses', busesRoutes);
+app.use('/buses_admin/',busesAdminRoutes);
 app.use('/tickets',ticketRoutes);
+app.use('/tickets_admin',ticketsAdminRoutes);
 
 app.use((req,res,next) => {
     const error = new Error('API Not Found')

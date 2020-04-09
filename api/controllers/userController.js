@@ -24,7 +24,8 @@ exports.users_user_signup = (req,res,next) => {
                 const user = new User({
                     _id :new mongoose.Types.ObjectId(),
                     email : req.body.email,
-                    password: hash
+                    password: hash,
+                    role : req.body.role
                     })
                     user.save()
                     .then(result => {
@@ -69,14 +70,10 @@ exports.users_user_login = (req,res,next) => {
             if(response){
                 const token = jwt.sign({
                     email: user[0].email,
-                    _id : user[0]._id
-                },
-                process.env.JWT_KEY,
-                {
-                    expiresIn:"1h"
-                }
-                );
-                
+                    _id : user[0]._id,
+                    role : user[0].role
+                },process.env.JWT_KEY,{expiresIn:"1h"});
+
                 return res.status(200).json({
                     message:'Auth Successful',
                     token : token
@@ -100,7 +97,7 @@ exports.users_delete_user = (req,res,next) => {
     
     console.log(req.params.userId);
 
-    User.remove({ email : req.params.email })
+    User.findOneAndDelete({ email : req.params.email })
     .exec()
     .then(result => {
         res.status(200).json({

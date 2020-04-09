@@ -64,6 +64,9 @@ exports.tickets_get_ticket_details = (req,res,next) => {
     });
 }
 
+
+let is_locked = false;
+
 exports.tickets_create_ticket = (req,res,next) => {
     const busNumber = req.body.busNumber;
     const seatNumber = req.body.seatNumber;
@@ -77,7 +80,7 @@ exports.tickets_create_ticket = (req,res,next) => {
                 error :'Bus cannot be found'
             });
         }
-        if(req.body.currentStatus){
+        if(req.body.currentStactus){
             return res.status(500).json({
                 error : "Cannot send currentStatus with ticket body" 
             });
@@ -92,13 +95,15 @@ exports.tickets_create_ticket = (req,res,next) => {
     .then(
         result =>{
             console.log(result);
-            if(!result){
+            if(!result && is_locked===false){
+                is_locked = true;
                 const ticket = new Ticket({
                         _id : new mongoose.Types.ObjectId(),
                         busNumber : busNumber,
                         seatNumber : seatNumber,
                         name : req.body.name,
                         age : req.body.age ,
+                        
                         currentStatus : 'CLOSED'
                     })
                     return ticket.save()
@@ -109,6 +114,7 @@ exports.tickets_create_ticket = (req,res,next) => {
         })
     .then(result =>{
         console.log(result);
+        is_locked = false;
         res.status(200).json({
             message : "Ticket Issued ",
             ticket : {
@@ -116,11 +122,14 @@ exports.tickets_create_ticket = (req,res,next) => {
                 seatNumber : result.seatNumber,
                 name : result.name,
                 age : result.age,
+                id : result._id , 
                 currentStatus : result.currentStatus
             }
         });
+        
     })
     .catch(err =>{
+        is_locked = false;
         res.status(500).json({
             message : 'Ticket Not Issued ',
             error : err
@@ -165,28 +174,25 @@ exports.tickets_get_all_open_tickets= (req,res,next)=>{
     .then(result=>{
         if(result){
             occupied = _.range(result.numberOfSeats);
-            return Ticket.find({currentStatus:'CLOSED',busNumber:busId}).exec()    
+            return Ticket.find({busNumber:busId,currentStatus:'CLOSED'}).exec()    
         }
         return res.status(404).json({
             message:'Bus Not Found'
         })
     })
     .then(result=>{
-        if(result.length>0){
+        if(result.length>=0){
+            var c = 1;
             result.forEach(element => {
-                occupied.splice(element['seatNumber']-1,1);
-                
+                occupied.splice(element['seatNumber']-c,1);
+                c++;
             });
-
+            // console.log(occupied);
         res.status(200).json({
             busNumber : busId,
-            seatAvailable : occupied.map( function(value) { return value + 1; }).toString()
+            seatAvailable : occupied.map( function(value) { return value + 1; })
             });
         }
-
-        res.status(200).json({
-            message : 'No tickets Booked for this Bus'
-        });
         
     })
     .catch(err=>{
